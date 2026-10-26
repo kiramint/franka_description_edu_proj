@@ -14,19 +14,19 @@
 
 import os
 
+import xacro
 from ament_index_python.packages import get_package_share_directory
+from launch_ros.actions import Node
+
 from launch import LaunchContext, LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 
-from launch_ros.actions import Node
-import xacro
-
 
 def robot_state_publisher_spawner(context: LaunchContext, robot_type, load_gripper, ee_id):
-    robot_type_str = context.perform_substitution(robot_type)
-    load_gripper_str = context.perform_substitution(load_gripper)
-    ee_id_str = context.perform_substitution(ee_id)
+    robot_type_str = robot_type
+    load_gripper_str = load_gripper
+    ee_id_str = ee_id
     franka_xacro_filepath = os.path.join(
         get_package_share_directory('franka_description'),
         'robots',
@@ -50,14 +50,14 @@ def robot_state_publisher_spawner(context: LaunchContext, robot_type, load_gripp
 
 
 def generate_launch_description():
-    load_gripper_parameter_name = 'load_gripper'
-    load_gripper = LaunchConfiguration(load_gripper_parameter_name)
+    load_gripper_parameter_name = 'true'
+    load_gripper = load_gripper_parameter_name
 
-    ee_id_parameter_name = 'ee_id'
-    ee_id = LaunchConfiguration(ee_id_parameter_name)
+    ee_id_parameter_name = 'franka_hand'
+    ee_id = ee_id_parameter_name
 
-    robot_type_parameter_name = 'robot_type'
-    robot_type = LaunchConfiguration(robot_type_parameter_name)
+    robot_type_parameter_name = 'fr3'
+    robot_type = robot_type_parameter_name
 
     rviz_file = os.path.join(
         get_package_share_directory('franka_description'),
@@ -85,8 +85,9 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 robot_type_parameter_name,
+                default_value='fr3',
                 description='ID of the type of robot used. Supported values: '
-                'fer, fr3, fp3, fr3v2, fr3v2_1, tmrv0_2, fr3v2_duo, mobile_fr3_duo_v0_2',
+                'fr3',
             ),
             robot_state_publisher_spawner_opaque_function,
             Node(

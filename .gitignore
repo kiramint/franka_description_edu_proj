@@ -3,3 +3,6 @@
 *.env
 *.srdf
 .vscode
+build
+install
+log
