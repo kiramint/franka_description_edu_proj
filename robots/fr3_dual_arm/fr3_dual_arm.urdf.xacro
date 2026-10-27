@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="fr3">
+
+    <!-- Define arguments -->
+    <!-- The ID of the robot model to be used -->
+    <xacro:arg name="robot_type" default="fr3"/>
+    <!-- Don't print a prefix for joints, visuals, and links? -->
+    <xacro:arg name="no_prefix" default="false"/>
+    <!-- Should an end-effector be mounted at the flange?" -->
+    <xacro:arg name="hand" default="true"/>
+    <!-- Which end-effector would be mounted at the flange?" -->
+    <xacro:arg name="ee_id" default="franka_hand"/>
+    <!-- Where is the end-effector connected to, if different from the robot flange?  -->
+    <xacro:arg name="special_connection" default=""/>
+    <!-- Position offset between ee and parent frame -->
+    <xacro:arg name="xyz_ee" default="0 0 0"/>
+    <!-- Rotation offset between ee and parent frame -->
+    <xacro:arg name="rpy_ee" default="0 0 ${-pi/4}"/>
+    <!-- Position offset between ee frame and tcp frame -->
+    <xacro:arg name="tcp_xyz" default=""/>
+    <!-- Rotation offset between ee frame and tcp frame -->
+    <xacro:arg name="tcp_rpy" default="0 0 0"/>
+    <!-- Safety distance for the collision capsules -->
+    <xacro:arg name="safety_distance" default="0.03"/>
+    <!-- Should self-collision be enabled? -->
+    <xacro:arg name="with_sc" default="false"/>
+    <!-- Emit the coarse self-collision capsule geometry inside the *_sc sub-links? -->
+    <xacro:arg name="include_self_collision_geometry" default="true"/>
+    <!-- Name of the description package -->
+    <xacro:arg name="description_pkg" default="franka_description"/>
+    <!-- Append an underscore to the user-provided prefix, if non-empty. -->
+    <xacro:property name="prefix" value="$(arg arm_prefix)"/>
+    <xacro:property name="modified_prefix" value="${prefix + '_' if prefix else ''}"/>
+    <!--Position
+    offset with respect to the world-->
+    <xacro:arg name="xyz" default="0 0 0"/>
+    <!--Rotation
+    offset with respect to the world-->
+    <xacro:arg name="rpy" default="0 0 0"/>
+
+    <link name="base_link">
+        <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1.0"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+        </inertial>
+        <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <box size="0.04 0.04 0.04"/>
+        </geometry>
+        <material name="">
+            <color rgba="0.7 0.7 0.7 1"/>
+        </material>
+        </visual>
+        <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <box size="0.04 0.04 0.04"/> <!-- 根据需要设置baselink形状 -->
+        </geometry>
+        </collision>
+    </link>
+
+    
+    <!-- 左臂 -->
+    <xacro:include filename="$(find franka_description)/robots/common/franka_robot.xacro"/>
+    <xacro:franka_robot robot_type="fr3"
+    include_self_collision_geometry="$(arg include_self_collision_geometry)"
+    hand="$(arg hand)"
+    ee_id="$(arg ee_id)"
+    special_connection="$(arg special_connection)"
+    xyz_ee="$(arg xyz_ee)"
+    rpy_ee="$(arg rpy_ee)"
+    tcp_xyz="$(arg tcp_xyz)"
+    tcp_rpy="$(arg tcp_rpy)"
+    safety_distance="$(arg safety_distance)"
+    with_sc="$(arg with_sc)"
+    no_prefix="$(arg no_prefix)"
+    arm_prefix="left_"
+    description_pkg="$(arg description_pkg)"
+    connected_to="left_base_link">
+    </xacro:franka_robot>
+    <!-- 右臂 -->
+    <xacro:include filename="$(find franka_description)/robots/common/franka_robot.xacro"/>
+    <xacro:franka_robot robot_type="fr3"
+    include_self_collision_geometry="$(arg include_self_collision_geometry)"
+    hand="$(arg hand)"
+    ee_id="$(arg ee_id)"
+    special_connection="$(arg special_connection)"
+    xyz_ee="$(arg xyz_ee)"
+    rpy_ee="$(arg rpy_ee)"
+    tcp_xyz="$(arg tcp_xyz)"
+    tcp_rpy="$(arg tcp_rpy)"
+    safety_distance="$(arg safety_distance)"
+    with_sc="$(arg with_sc)"
+    no_prefix="$(arg no_prefix)"
+    arm_prefix="right_"
+    description_pkg="$(arg description_pkg)"
+    connected_to="right_base_link">
+    </xacro:franka_robot>
+
+    <!-- 左右臂的固定 关节 -->
+    <joint name="left_base_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="left_base_link"/>
+        <!-- rpy为roll,pitch,yaw,即绕x、y、z轴旋转，先r再p后y -->
+        <origin xyz="0 0.04 0" rpy="-1.5708 1.5708 0"/>
+    </joint>
+
+    <joint name="right_base_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="right_base_link"/>
+        <origin xyz="0 -0.04 0" rpy="1.5708 1.5708 0"/>
+    </joint>
+</robot>
